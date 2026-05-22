@@ -1,0 +1,7 @@
+ ⚠ experimental.useWasmBinary is not an option for supported platform linux/x64 and will be ignored.
+   ▲ Next.js 15.5.18
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+
+> Build failed because of webpack errors
