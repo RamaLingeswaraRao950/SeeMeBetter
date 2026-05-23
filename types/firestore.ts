@@ -26,6 +26,7 @@ export type ResponseDoc = {
   createdAt: unknown;
   anonymousId: string;
   source: "web";
+  formHandle?: string;
   answers: ResponseAnswer[];
 };
 

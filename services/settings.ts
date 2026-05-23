@@ -2,8 +2,8 @@ import { doc, getDoc } from "firebase/firestore/lite";
 import { firebaseDb } from "@/firebase/firebase";
 import type { GlobalSettingsDoc } from "@/types/firestore";
 
-export async function fetchGlobalSettings(): Promise<GlobalSettingsDoc> {
-  const ref = doc(firebaseDb, "settings", "global");
+export async function fetchUserSettings(uid: string): Promise<GlobalSettingsDoc> {
+  const ref = doc(firebaseDb, "users", uid);
   const snap = await getDoc(ref);
   if (!snap.exists()) {
     return {

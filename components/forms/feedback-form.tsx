@@ -15,7 +15,7 @@ import { toast } from "@/components/ui/toaster";
 import { useQuestions } from "@/hooks/use-questions";
 import { useSettings } from "@/hooks/use-settings";
 import { buildFeedbackSchema } from "@/lib/validation";
-import { getAnonymousId } from "@/utils/anonymous";
+import { canSubmitNow, getAnonymousId, markSubmittedNow } from "@/utils/anonymous";
 import { createResponse } from "@/services/responses";
 import type { QuestionDoc, ResponseAnswer } from "@/types/firestore";
 
@@ -32,8 +32,13 @@ function defaultValueFor(q: QuestionDoc) {
 
 export function FeedbackForm() {
   const router = useRouter();
-  const { data: questions, loading, error } = useQuestions();
-  const { data: settings } = useSettings();
+  throw new Error("FeedbackForm must be used via <FeedbackFormForUser />");
+}
+
+export function FeedbackFormForUser(props: { uid: string; handle: string }) {
+  const router = useRouter();
+  const { data: questions, loading, error } = useQuestions(props.uid);
+  const { data: settings } = useSettings(props.uid);
 
   const schema = useMemo(() => buildFeedbackSchema(questions ?? []), [questions]);
   const form = useForm<z.infer<typeof schema>>({
@@ -64,6 +69,9 @@ export function FeedbackForm() {
     return (
       <Card className="p-6">
         <div className="text-sm text-mutedForeground">Could not load questions.</div>
+        <div className="mt-2 break-words text-xs text-mutedForeground">
+          {String((error as any)?.message ?? error)}
+        </div>
       </Card>
     );
   }
@@ -83,6 +91,13 @@ export function FeedbackForm() {
       onSubmit={form.handleSubmit(async (values) => {
         setSubmitting(true);
         try {
+          const cooldownHours = settings?.cooldownHours ?? 12;
+          const cooldownCheck = canSubmitNow(props.handle, cooldownHours);
+          if (!cooldownCheck.ok) {
+            toast.error("Please wait before submitting again.");
+            return;
+          }
+
           const answers: ResponseAnswer[] = questions.map((q) => {
             const v = (values as Record<string, unknown>)[q.id];
             return {
@@ -94,11 +109,14 @@ export function FeedbackForm() {
           });
 
           const { responseId } = await createResponse({
-            anonymousId: getAnonymousId(),
+            uid: props.uid,
+            handle: props.handle,
+            anonymousId: getAnonymousId(props.handle),
             answers
           });
+          markSubmittedNow(props.handle);
           toast.success("Submitted. Thank you!");
-          router.replace(`/thank-you?rid=${encodeURIComponent(responseId)}`);
+          router.replace(`/thank-you?h=${encodeURIComponent(props.handle)}&rid=${encodeURIComponent(responseId)}`);
         } catch (e) {
           toast.error("Could not submit. Please try again.");
         } finally {

@@ -2,9 +2,9 @@ import { collection, getDocs, orderBy, query, where } from "firebase/firestore/l
 import { firebaseDb } from "@/firebase/firebase";
 import type { QuestionDoc } from "@/types/firestore";
 
-export async function fetchActiveQuestions(): Promise<QuestionDoc[]> {
+export async function fetchActiveQuestionsForUser(uid: string): Promise<QuestionDoc[]> {
   const q = query(
-    collection(firebaseDb, "questions"),
+    collection(firebaseDb, "users", uid, "questions"),
     where("active", "==", true),
     where("isDeleted", "==", false),
     orderBy("order", "asc")

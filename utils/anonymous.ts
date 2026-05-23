@@ -1,18 +1,25 @@
-const KEY = "smb:anonymousId";
-const LAST_SUBMITTED_AT = "smb:lastSubmittedAt";
+function keyFor(handle: string) {
+  const h = handle.trim().toLowerCase();
+  return {
+    anonId: `smb:${h}:anonymousId`,
+    lastSubmittedAt: `smb:${h}:lastSubmittedAt`
+  };
+}
 
-export function getAnonymousId(): string {
+export function getAnonymousId(handle: string): string {
   if (typeof window === "undefined") return "server";
-  const existing = window.localStorage.getItem(KEY);
+  const k = keyFor(handle);
+  const existing = window.localStorage.getItem(k.anonId);
   if (existing && existing.length >= 8) return existing;
   const fresh = crypto.randomUUID();
-  window.localStorage.setItem(KEY, fresh);
+  window.localStorage.setItem(k.anonId, fresh);
   return fresh;
 }
 
-export function canSubmitNowMs(cooldownMs: number): { ok: boolean; nextAt?: number } {
+export function canSubmitNowMs(handle: string, cooldownMs: number): { ok: boolean; nextAt?: number } {
   if (typeof window === "undefined") return { ok: false };
-  const raw = window.localStorage.getItem(LAST_SUBMITTED_AT);
+  const k = keyFor(handle);
+  const raw = window.localStorage.getItem(k.lastSubmittedAt);
   if (!raw) return { ok: true };
   const last = Number(raw);
   if (!Number.isFinite(last)) return { ok: true };
@@ -22,11 +29,12 @@ export function canSubmitNowMs(cooldownMs: number): { ok: boolean; nextAt?: numb
   return { ok: false, nextAt };
 }
 
-export function canSubmitNow(cooldownHours: number): { ok: boolean; nextAt?: number } {
-  return canSubmitNowMs(Math.max(0, cooldownHours) * 60 * 60 * 1000);
+export function canSubmitNow(handle: string, cooldownHours: number): { ok: boolean; nextAt?: number } {
+  return canSubmitNowMs(handle, Math.max(0, cooldownHours) * 60 * 60 * 1000);
 }
 
-export function markSubmittedNow() {
+export function markSubmittedNow(handle: string) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(LAST_SUBMITTED_AT, String(Date.now()));
+  const k = keyFor(handle);
+  window.localStorage.setItem(k.lastSubmittedAt, String(Date.now()));
 }
