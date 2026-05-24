@@ -86,7 +86,7 @@ export default function ThankYouPage() {
 
           {!normalized ? (
             <div className="mt-3 text-sm text-mutedForeground">
-              Invalid link. Missing handle. Use <span className="font-mono">/thank-you?h=ramalingam&amp;rid=...</span>.
+              Invalid link. Missing handle. Use <span className="font-mono">/thank-you?h=your-handle&amp;rid=...</span>.
             </div>
           ) : !uid ? (
             <div className="mt-3 text-sm text-mutedForeground">This feedback link is not valid.</div>

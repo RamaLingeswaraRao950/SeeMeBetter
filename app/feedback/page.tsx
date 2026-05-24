@@ -5,6 +5,7 @@ import { Container } from "@/components/ui/container";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { Card } from "@/components/ui/card";
 import { FeedbackFormForUser } from "@/components/forms/feedback-form";
+import { useSettings } from "@/hooks/use-settings";
 import { resolveUidByHandle } from "@/services/handles";
 
 function readHandleFromLocation(): string {
@@ -19,6 +20,7 @@ export default function FeedbackPage() {
   const [uid, setUid] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const { data: settings } = useSettings(uid);
 
   useEffect(() => {
     const h = readHandleFromLocation() || (process.env.NEXT_PUBLIC_DEFAULT_HANDLE ?? "").trim().toLowerCase();
@@ -57,7 +59,9 @@ export default function FeedbackPage() {
     <Container className="py-10">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-lg font-semibold">Anonymous Feedback</div>
+          <div className="text-lg font-semibold">
+            Anonymous Feedback{settings?.profileName ? ` for ${settings.profileName}` : ""}
+          </div>
           <div className="mt-1 text-sm text-mutedForeground">
             Your response is anonymous and helps me improve.
           </div>
@@ -78,7 +82,7 @@ export default function FeedbackPage() {
         ) : !normalized ? (
           <Card className="p-6">
             <div className="text-sm text-mutedForeground">
-              Invalid link. Missing handle. Use a link like <span className="font-mono">/feedback?h=ramalingam</span>.
+              Invalid link. Missing handle. Use a link like <span className="font-mono">/feedback?h=your-handle</span>.
             </div>
           </Card>
         ) : notFound || !uid ? (

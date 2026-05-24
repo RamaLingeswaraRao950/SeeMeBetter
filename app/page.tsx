@@ -33,9 +33,9 @@ export default function HomePage() {
             className="mt-2 h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none ring-offset-background focus:ring-2 focus:ring-border"
             value={handle}
             onChange={(e) => setHandle(e.target.value)}
-            placeholder="ramalingam"
+            placeholder="Enter user handle ID to start giving feedback"
           />
-          <div className="mt-2 text-xs text-mutedForeground">Allowed: a-z 0-9 _ - (3–20 chars), lowercase.</div>
+          <div className="mt-2 text-xs text-mutedForeground">Allowed: a-z 0-9 _ - (3-20 chars), lowercase.</div>
         </div>
 
         <div className="mt-6 flex flex-wrap gap-3">
